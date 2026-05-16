@@ -62,17 +62,17 @@ with st.sidebar:
     api_key = st.text_input("Nhập Gemini API Key:", type="password")
     
     st.markdown("---")
-    # Menu chọn Model AI cực kỳ đa dạng
+    # Menu chọn Model AI cập nhật đầy đủ các bản mới nhất
     loai_model_name = st.selectbox(
         "🧠 Chọn phiên bản AI (Model):",
         [
             "gemini-1.5-flash (Tốc độ cực nhanh - Khuyên dùng)",
-            "gemini-1.5-flash-latest (Bản cập nhật Flash mới nhất tự động)",
             "gemini-1.5-pro (Phân tích chuyên sâu - Khắt khe)",
-            "gemini-1.5-pro-latest (Bản Pro cập nhật mới nhất tự động)",
-            "gemini-2.0-flash (Hiệu năng nâng cấp vượt trội)",
-            "gemini-2.0-pro-exp (Thử nghiệm 2.0 cực mạnh)",
-            "gemini-3.1-pro-preview (Bản xem trước thế hệ siêu việt)"
+            "gemini-flash-latest (Bản Flash tự động cập nhật mới nhất)",
+            "gemini-pro-latest (Bản Pro tự động cập nhật mới nhất)",
+            "gemini-flash-lite-latest (Bản Lite siêu nhẹ, siêu tốc)",
+            "gemini-3-flash-preview (Bản Flash thế hệ 3 thử nghiệm)",
+            "gemini-3.1-pro-preview (Bản Pro thế hệ 3.1 siêu việt)"
         ]
     )
     
