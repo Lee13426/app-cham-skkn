@@ -7,7 +7,7 @@ import PyPDF2
 import io
 
 # Thiết lập giao diện
-st.set_page_config(page_title="AI Chấm SKKN - Mẫu 09 & 10 Đồng Tháp", layout="wide")
+st.set_page_config(page_title="AI Chấm SKKN - Đa nền tảng Model", layout="wide")
 
 def doc_noi_dung(file):
     text = ""
@@ -60,6 +60,22 @@ def tao_file_word(ten_skkn, linh_vuc, ten_tac_gia, don_vi, ten_giam_khao, chuc_v
 with st.sidebar:
     st.title("⚙️ Cấu hình Hệ thống")
     api_key = st.text_input("Nhập Gemini API Key:", type="password")
+    
+    st.markdown("---")
+    # Menu chọn Model AI cực kỳ đa dạng
+    loai_model_name = st.selectbox(
+        "🧠 Chọn phiên bản AI (Model):",
+        [
+            "gemini-1.5-flash (Tốc độ cực nhanh - Khuyên dùng)",
+            "gemini-1.5-flash-latest (Bản cập nhật Flash mới nhất tự động)",
+            "gemini-1.5-pro (Phân tích chuyên sâu - Khắt khe)",
+            "gemini-1.5-pro-latest (Bản Pro cập nhật mới nhất tự động)",
+            "gemini-2.0-flash (Hiệu năng nâng cấp vượt trội)",
+            "gemini-2.0-pro-exp (Thử nghiệm 2.0 cực mạnh)",
+            "gemini-3.1-pro-preview (Bản xem trước thế hệ siêu việt)"
+        ]
+    )
+    
     st.info("Hệ thống tuân thủ thang điểm 100 theo Mẫu 09 và xuất form Mẫu 10.")
 
 st.header("📝 Thông tin Định danh (Xuất file Word)")
@@ -92,7 +108,10 @@ if st.button("Bắt đầu chấm điểm"):
                 noi_dung = doc_noi_dung(uploaded_file)
                 
                 genai.configure(api_key=api_key)
-                model = genai.GenerativeModel('gemini-1.5-flash')
+                
+                # Trích xuất chính xác tên model gửi cho Google (Lấy chữ đầu tiên trước dấu cách)
+                model_name = loai_model_name.split(" ")[0]
+                model = genai.GenerativeModel(model_name)
                 
                 prompt = f"""
                 Bạn là thành viên hội đồng chuyên ngành chấm Sáng kiến kinh nghiệm. Hãy đọc nội dung SKKN sau và viết Phiếu nhận xét.
@@ -127,7 +146,7 @@ if st.button("Bắt đầu chấm điểm"):
                 st.session_state.ai_text = response.text
                 st.session_state.word_bytes = tao_file_word(ten_skkn, linh_vuc, ten_tac_gia, don_vi, ten_giam_khao, chuc_vu, response.text)
                 
-                st.success("Đã phân tích xong!")
+                st.success(f"Đã phân tích xong bằng bộ não {model_name}!")
                 
             except Exception as e:
                 st.error(f"Có lỗi xảy ra: {e}")
@@ -139,7 +158,7 @@ if "ai_text" in st.session_state:
     st.download_button(
         label="📥 TẢI XUỐNG FILE WORD",
         data=st.session_state.word_bytes,
-        file_name="Phieu_Danh_Gia_SKKN_NangCap.docx",
+        file_name="Phieu_Danh_Gia_SKKN_HoanChinh.docx",
         mime="application/vnd.openxmlformats-officedocument.wordprocessingml.document",
         type="primary"
     )
