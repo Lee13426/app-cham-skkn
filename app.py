@@ -7,7 +7,7 @@ import PyPDF2
 import io
 
 # Thiết lập giao diện
-st.set_page_config(page_title="AI Chấm SKKN - Đa nền tảng Model", layout="wide")
+st.set_page_config(page_title="AI Chấm SKKN - Tùy chỉnh Model", layout="wide")
 
 def doc_noi_dung(file):
     text = ""
@@ -62,19 +62,33 @@ with st.sidebar:
     api_key = st.text_input("Nhập Gemini API Key:", type="password")
     
     st.markdown("---")
-    # Menu chọn Model AI cập nhật đầy đủ các bản mới nhất
-    loai_model_name = st.selectbox(
-        "🧠 Chọn phiên bản AI (Model):",
-        [
-            "gemini-1.5-flash (Tốc độ cực nhanh - Khuyên dùng)",
-            "gemini-1.5-pro (Phân tích chuyên sâu - Khắt khe)",
-            "gemini-flash-latest (Bản Flash tự động cập nhật mới nhất)",
-            "gemini-pro-latest (Bản Pro tự động cập nhật mới nhất)",
-            "gemini-flash-lite-latest (Bản Lite siêu nhẹ, siêu tốc)",
-            "gemini-3-flash-preview (Bản Flash thế hệ 3 thử nghiệm)",
-            "gemini-3.1-pro-preview (Bản Pro thế hệ 3.1 siêu việt)"
-        ]
+    st.markdown("**🧠 Cấu hình phiên bản AI (Model)**")
+    
+    # Công tắc chọn cách nhập
+    cach_chon = st.radio(
+        "Cách nhập Model:",
+        ["Chọn từ danh sách có sẵn", "Nhập thủ công (Copy từ AI Studio)"]
     )
+    
+    if cach_chon == "Chọn từ danh sách có sẵn":
+        loai_model_name = st.selectbox(
+            "Chọn phiên bản:",
+            [
+                "gemini-1.5-flash (Tốc độ cực nhanh - Khuyên dùng)",
+                "gemini-1.5-pro (Phân tích chuyên sâu - Khắt khe)",
+                "gemini-flash-latest (Bản Flash tự động cập nhật)",
+                "gemini-pro-latest (Bản Pro tự động cập nhật)",
+                "gemini-flash-lite-latest (Bản Lite siêu nhẹ)",
+                "gemini-3-flash-preview (Bản Flash thế hệ 3)",
+                "gemini-3.1-pro-preview (Bản Pro thế hệ 3.1)"
+            ]
+        )
+        model_name_final = loai_model_name.split(" ")[0]
+    else:
+        model_name_final = st.text_input(
+            "⌨️ Nhập chính xác tên Model:", 
+            placeholder="Ví dụ: gemini-1.5-pro-exp-0827"
+        )
     
     st.info("Hệ thống tuân thủ thang điểm 100 theo Mẫu 09 và xuất form Mẫu 10.")
 
@@ -102,16 +116,15 @@ with col_b:
 if st.button("Bắt đầu chấm điểm"):
     if not api_key or not uploaded_file:
         st.error("Vui lòng nhập API Key và tải file lên!")
+    elif not model_name_final:
+        st.error("Vui lòng nhập tên Model hoặc chọn từ danh sách!")
     else:
-        with st.spinner("Hệ thống đang phân tích chuyên sâu. Vui lòng đợi..."):
+        with st.spinner(f"Hệ thống đang phân tích chuyên sâu bằng {model_name_final}. Vui lòng đợi..."):
             try:
                 noi_dung = doc_noi_dung(uploaded_file)
                 
                 genai.configure(api_key=api_key)
-                
-                # Trích xuất chính xác tên model gửi cho Google (Lấy chữ đầu tiên trước dấu cách)
-                model_name = loai_model_name.split(" ")[0]
-                model = genai.GenerativeModel(model_name)
+                model = genai.GenerativeModel(model_name_final)
                 
                 prompt = f"""
                 Bạn là thành viên hội đồng chuyên ngành chấm Sáng kiến kinh nghiệm. Hãy đọc nội dung SKKN sau và viết Phiếu nhận xét.
@@ -146,7 +159,7 @@ if st.button("Bắt đầu chấm điểm"):
                 st.session_state.ai_text = response.text
                 st.session_state.word_bytes = tao_file_word(ten_skkn, linh_vuc, ten_tac_gia, don_vi, ten_giam_khao, chuc_vu, response.text)
                 
-                st.success(f"Đã phân tích xong bằng bộ não {model_name}!")
+                st.success(f"Đã phân tích xong bằng bộ não {model_name_final}!")
                 
             except Exception as e:
                 st.error(f"Có lỗi xảy ra: {e}")
